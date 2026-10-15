@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#39452d">
+  <title>Acompanhamento de estudos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --forest: #707a47;
+      --forest-deep: #090c0a;
+      --lime: #ff6b24;
+      --paper: #0b0f0c;
+      --white: #151a17;
+      --ink: #eef2e9;
+      --muted: #a0a89e;
+      --line: #303832;
+      --orange: #ff6b24;
+      --blue: #91a19b;
+      --sans: "IBM Plex Sans", "Trebuchet MS", sans-serif;
+      --serif: "Barlow Condensed", "Arial Narrow", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background-color: var(--paper); background-image: linear-gradient(#39452d08 1px, transparent 1px), linear-gradient(90deg, #39452d08 1px, transparent 1px); background-size: 28px 28px; color: var(--ink); font-family: var(--sans); font-size: 14px; }
+    button, input, select, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #a99b6f; outline-offset: 3px; }
+    .app { min-height: 100vh; }
+    .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 5; display: flex; width: 238px; flex-direction: column; padding: 29px 17px 20px; background: var(--forest-deep); color: #f2f0e7; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 11px; color: #fff; font-size: 15px; font-weight: 700; }
+    .brand-mark { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border: 1px solid #d8c99b; border-radius: 3px; background: #d8c99b; color: var(--forest-deep); font-family: var(--serif); font-size: 16px; }
+    .brand small { display: block; margin-top: 2px; color: #c8c8b6; font-size: 8px; font-weight: 600; }
+    .nav-label { margin: 45px 11px 12px; color: #92a99a; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button { display: flex; align-items: center; gap: 13px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 7px; background: transparent; color: #ccdbcf; text-align: left; cursor: pointer; transition: background .18s, color .18s; }
+    .nav button:hover { background: #ffffff12; color: #fff; }
+    .nav button.active { background: #ffffff15; color: var(--lime); }
+    .nav svg { width: 18px; height: 18px; flex: 0 0 auto; stroke: currentColor; }
+    .side-bottom { margin-top: auto; }
+    .side-tip { padding: 17px 15px; border: 1px solid #ffffff24; border-radius: 8px; background: #ffffff08; }
+    .side-tip span { color: var(--lime); font-size: 11px; font-weight: 700; }
+    .side-tip p { margin: 8px 0 0; color: #c5d3c8; font-family: var(--serif); font-size: 16px; line-height: 1.4; }
+    .profile { display: flex; align-items: center; gap: 11px; margin: 19px 5px 0; padding-top: 17px; border-top: 1px solid #ffffff20; }
+    .avatar { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #f2a278; color: #492d20; font-size: 12px; font-weight: 700; }
+    .profile strong { display: block; font-size: 12px; font-weight: 600; }
+    .profile small { display: block; margin-top: 3px; color: #a9bbac; font-size: 10px; }
+
+    .workspace { min-height: 100vh; margin-left: 238px; }
+    .topbar { display: flex; min-height: 66px; align-items: center; justify-content: space-between; padding: 0 38px; border-bottom: 1px solid var(--line); background: #fbfcf8; }
+    .breadcrumb { color: var(--muted); font-size: 12px; }
+    .breadcrumb strong { color: var(--ink); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 18px; }
+    .today-label { color: #657064; font-size: 12px; }
+    .icon-button { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: #fff; cursor: pointer; }
+    .icon-button svg { width: 17px; height: 17px; stroke: #566354; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 304px; gap: 34px; max-width: 1480px; margin: 0 auto; padding: 34px 38px 48px; }
+    .main-column { min-width: 0; }
+    .eyebrow { margin: 0 0 8px; color: #73816d; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; }
+    h1 { margin: 0; font-family: var(--serif); font-size: clamp(28px, 3vw, 39px); font-weight: 500; line-height: 1.12; }
+    .intro { margin: 8px 0 25px; color: #798275; font-size: 13px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 29px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcf8; }
+    .stat { min-width: 0; padding: 17px 19px; }
+    .stat + .stat { border-left: 1px solid var(--line); }
+    .stat-label { display: flex; align-items: center; gap: 7px; color: #798275; font-size: 11px; }
+    .stat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
+    .stat:nth-child(2) .stat-dot { background: var(--blue); }
+    .stat:nth-child(3) .stat-dot { background: #90b947; }
+    .stat-value { margin-top: 8px; font-family: var(--serif); font-size: 26px; line-height: 1; }
+    .stat-note { margin-top: 6px; color: #8d9589; font-size: 10px; }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+    .section-heading h2 { margin: 0; font-family: var(--serif); font-size: 22px; font-weight: 500; }
+    .text-button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; border: 0; background: none; color: var(--forest); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .text-button:hover { color: #4d762d; }
+    .text-button svg { width: 15px; height: 15px; stroke: currentColor; }
+    .task-list { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fbfcf8; }
+    .task-row { display: grid; grid-template-columns: 21px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 68px; padding: 10px 16px; }
+    .task-row + .task-row { border-top: 1px solid var(--line); }
+    .task-check { position: relative; display: grid; width: 19px; height: 19px; place-items: center; border: 1px solid #c9d0c5; border-radius: 50%; background: transparent; cursor: pointer; }
+    .task-check:hover { border-color: var(--forest); }
+    .task-check svg { display: none; width: 12px; height: 12px; stroke: #fff; }
+    .task-row.done .task-check { border-color: var(--forest); background: var(--forest); }
+    .task-row.done .task-check svg { display: block; }
+    .task-row.done .task-title { color: #92998e; text-decoration: line-through; }
+    .task-title { font-size: 13px; font-weight: 600; }
+    .task-subject { margin-top: 4px; color: #899185; font-size: 10px; }
+    .task-time { color: #758070; font-size: 11px; white-space: nowrap; }
+    .empty-state { padding: 25px; color: var(--muted); text-align: center; }
+    .week-section { margin-top: 30px; }
+    .week-total { color: #798275; font-size: 11px; }
+    .week-chart { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 14px; height: 137px; padding: 17px 5px 0; border-bottom: 1px solid var(--line); }
+    .day-column { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: end; gap: 8px; }
+    .bar-track { display: flex; width: 100%; max-width: 35px; height: 88px; align-items: end; overflow: hidden; border-radius: 5px 5px 2px 2px; background: #e9ede4; }
+    .bar-fill { width: 100%; min-height: 5px; border-radius: 5px 5px 2px 2px; background: #7eaa65; animation: grow .65s ease-out both; transform-origin: bottom; }
+    .bar-fill[style*="height:0%"] { min-height: 0; }
+    .day-column:nth-child(2n) .bar-fill { background: #b0cb77; }
+    .day-column.today .bar-fill { background: var(--forest); }
+    .day-label { padding-bottom: 9px; color: #7a8476; font-size: 10px; }
+    .day-column.today .day-label { color: var(--forest); font-weight: 700; }
+    @keyframes grow { from { transform: scaleY(.1); } to { transform: scaleY(1); } }
+
+    .right-column { min-width: 0; padding-top: 7px; }
+    .focus-card { overflow: hidden; border-radius: 9px; background: var(--forest-deep); color: white; }
+    .focus-photo { position: relative; height: 126px; overflow: hidden; background: #74816b; }
+    .focus-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 46%; opacity: .8; }
+    .focus-photo::after { position: absolute; inset: 0; background: linear-gradient(0deg, #102c21cc, transparent 82%); content: ""; }
+    .focus-photo-label { position: absolute; z-index: 1; right: 16px; bottom: 13px; left: 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; font-size: 10px; }
+    .live-dot { display: inline-flex; align-items: center; gap: 6px; }
+    .live-dot::before { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); content: ""; }
+    .focus-body { padding: 19px 20px 20px; }
+    .focus-overline { color: #b2c4b4; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .focus-title { margin: 7px 0 16px; font-family: var(--serif); font-size: 21px; font-weight: 500; }
+    .timer { margin: 0 0 16px; color: var(--lime); font-variant-numeric: tabular-nums; font-size: 50px; font-weight: 500; letter-spacing: 1px; line-height: 1; }
+    .timer-mode { display: flex; gap: 5px; margin-bottom: 17px; }
+    .mode-button { padding: 6px 9px; border: 1px solid #ffffff27; border-radius: 4px; background: transparent; color: #b7c5b9; font-size: 10px; cursor: pointer; }
+    .mode-button.active { border-color: var(--lime); background: #d5f36b18; color: var(--lime); }
+    .timer-actions { display: grid; grid-template-columns: 1fr 39px; gap: 8px; }
+    .start-button { min-height: 40px; border: 0; border-radius: 5px; background: var(--lime); color: var(--forest-deep); font-size: 12px; font-weight: 700; cursor: pointer; transition: filter .18s; }
+    .start-button:hover { filter: brightness(.94); }
+    .reset-button { display: grid; place-items: center; border: 1px solid #ffffff30; border-radius: 5px; background: transparent; color: white; cursor: pointer; }
+    .reset-button svg { width: 16px; height: 16px; stroke: currentColor; }
+    .focus-count { margin: 13px 0 0; color: #a5b7a7; font-size: 10px; text-align: center; }
+    .right-section { margin-top: 25px; }
+    .right-section h3 { margin: 0 0 14px; font-family: var(--serif); font-size: 19px; font-weight: 500; }
+    .goal-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; color: #6f796b; font-size: 11px; }
+    .goal-line strong { color: var(--ink); font-size: 12px; }
+    .progress-track { height: 7px; overflow: hidden; border-radius: 9px; background: #e5e9df; }
+    .progress-fill { width: 58%; height: 100%; border-radius: inherit; background: var(--forest); transition: width .25s; }
+    .goal-foot { margin: 8px 0 0; color: #858d80; font-size: 10px; }
+    .quote { margin-top: 25px; padding: 16px 17px; border-left: 2px solid var(--orange); background: #eeeee6; color: #55614f; font-family: var(--serif); font-size: 15px; line-height: 1.5; }
+    .quote small { display: block; margin-top: 7px; color: #8a9084; font-family: var(--sans); font-size: 10px; }
+
+    .view-panel { animation: appear .22s ease both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .view-intro { max-width: 570px; margin: 10px 0 26px; color: #798275; font-size: 13px; line-height: 1.65; }
+    .subject-list { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fbfcf8; }
+    .subject-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 13px; min-height: 76px; padding: 12px 16px; }
+    .subject-row + .subject-row { border-top: 1px solid var(--line); }
+    .subject-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 10px; background: #e6eddd; color: var(--forest); font-family: var(--serif); font-size: 17px; }
+    .subject-row:nth-child(2) .subject-icon { background: #f7e7d9; color: #a5532e; }
+    .subject-row:nth-child(3) .subject-icon { background: #e3e9f6; color: #4c67ae; }
+    .subject-row:nth-child(4) .subject-icon { background: #f1e7f0; color: #825879; }
+    .subject-row strong { font-size: 13px; }
+    .subject-row small { display: block; margin-top: 5px; color: #818a7e; font-size: 10px; }
+    .subject-progress { width: 76px; }
+    .subject-progress span { display: block; margin-bottom: 5px; color: #778072; font-size: 10px; text-align: right; }
+    .subject-progress .progress-track { height: 5px; }
+    .agenda-list { border-top: 1px solid var(--line); }
+    .agenda-day { display: grid; grid-template-columns: 72px minmax(0, 1fr); padding: 18px 3px; border-bottom: 1px solid var(--line); }
+    .agenda-date { color: #74806f; font-size: 11px; line-height: 1.5; }
+    .agenda-date strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 19px; font-weight: 500; }
+    .agenda-items { display: grid; gap: 8px; }
+    .agenda-item { display: flex; align-items: center; gap: 10px; color: #465143; font-size: 12px; }
+    .agenda-item::before { width: 7px; height: 7px; border-radius: 50%; background: #84a85d; content: ""; }
+    .agenda-item span { margin-left: auto; color: #899185; font-size: 10px; }
+    .exam-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 22px 0 28px; }
+    .exam-date { padding: 15px 17px; border: 1px solid var(--line); border-left: 3px solid var(--forest); border-radius: 6px; background: #fbfcf8; }
+    .exam-date.pcpe { border-left-color: var(--blue); }
+    .exam-date span { display: block; color: #778072; font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; }
+    .exam-date strong { display: block; margin-top: 6px; font-family: var(--serif); font-size: 20px; font-weight: 500; }
+    .exam-date small { display: block; margin-top: 4px; color: #899185; font-size: 10px; }
+    .plan-section { margin-top: 30px; }
+    .plan-section > p { margin: 8px 0 14px; color: #798275; font-size: 11px; line-height: 1.6; }
+    .plan-list { border-top: 1px solid var(--line); }
+    .plan-week { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 14px; padding: 15px 3px; border-bottom: 1px solid var(--line); }
+    .plan-week:has([data-week-index]) { grid-template-columns: 100px minmax(0, 1fr) 32px; }
+    .plan-week.week-done { background: #e8ebdf; }
+    .plan-week [data-week-index] svg { display: block; }
+    .plan-week.week-done [data-week-index] { border-color: var(--forest); background: var(--forest); color: #fff; }
+    .plan-week-date { color: #74806f; font-size: 10px; line-height: 1.45; }
+    .plan-week-date strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 17px; font-weight: 500; }
+    .plan-week-date small { display: block; margin-top: 4px; color: #879080; font-family: var(--sans); font-size: 9px; }
+    .plan-week-focus { display: grid; gap: 6px; }
+    .plan-track { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 7px; color: #53604e; font-size: 11px; line-height: 1.5; }
+    .plan-track strong { color: var(--forest); font-size: 9px; letter-spacing: .5px; }
+    .plan-track.pmpe strong { color: #bd6738; }
+    .plan-track.pcpe strong { color: #536fbe; }
+    .subject-group { margin-top: 24px; }
+    .subject-group h2 { margin: 0 0 10px; font-family: var(--serif); font-size: 20px; font-weight: 500; }
+    .subject-group p { margin: -3px 0 12px; color: #798275; font-size: 11px; line-height: 1.5; }
+    .subject-group .subject-list { border-radius: 6px; }
+    .subject-group .subject-row { grid-template-columns: 35px minmax(0, 1fr); min-height: 58px; }
+    .subject-group .subject-icon { width: 31px; height: 31px; border-radius: 8px; font-size: 14px; }
+    .subject-group .subject-row strong { font-size: 12px; }
+    .subject-group .subject-row small { margin-top: 3px; line-height: 1.45; }
+    .notes-label { display: block; margin-bottom: 10px; color: #657064; font-size: 11px; font-weight: 600; }
+    .notes-area { width: 100%; min-height: 255px; resize: vertical; padding: 17px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcf8; color: var(--ink); font-family: var(--sans); font-size: 13px; line-height: 1.7; }
+    .save-status { min-height: 18px; margin-top: 9px; color: #758070; font-size: 10px; }
+
+    dialog { width: min(420px, calc(100% - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 10px; background: #fbfcf8; color: var(--ink); box-shadow: 0 24px 80px #14251d40; }
+    dialog::backdrop { background: #0e211acc; backdrop-filter: blur(3px); }
+    .dialog-content { padding: 23px; }
+    .dialog-top { display: flex; align-items: start; justify-content: space-between; margin-bottom: 19px; }
+    .dialog-top h2 { margin: 0; font-family: var(--serif); font-size: 24px; font-weight: 500; }
+    .close-dialog { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 50%; background: #edf0e8; cursor: pointer; }
+    .form-field { display: grid; gap: 7px; margin-bottom: 14px; }
+    .form-field label { color: #657064; font-size: 11px; font-weight: 600; }
+    .form-field input, .form-field select { width: 100%; min-height: 41px; padding: 0 11px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); }
+    .submit-task { width: 100%; min-height: 42px; margin-top: 4px; border: 0; border-radius: 5px; background: var(--forest); color: white; font-weight: 600; cursor: pointer; }
+
+    @media (min-width: 1500px) { .layout { padding-top: 42px; } }
+    @media (max-width: 1120px) {
+      .sidebar { width: 210px; }
+      .workspace { margin-left: 210px; }
+      .layout { grid-template-columns: minmax(0, 1fr) 275px; gap: 24px; padding-right: 25px; padding-left: 25px; }
+      .topbar { padding-right: 25px; padding-left: 25px; }
+      .stat { padding-right: 13px; padding-left: 13px; }
+    }
+    @media (max-width: 850px) {
+      .sidebar { position: sticky; top: 0; width: 100%; height: 58px; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 20px; }
+      .brand { padding: 0; font-size: 16px; }
+      .brand-mark { width: 28px; height: 28px; font-size: 18px; }
+      .brand small, .nav-label, .side-bottom { display: none; }
+      .nav { display: flex; gap: 3px; }
+      .nav button { min-height: 36px; gap: 7px; padding: 0 10px; font-size: 11px; }
+      .nav svg { width: 16px; height: 16px; }
+      .workspace { margin-left: 0; }
+      .topbar { min-height: 52px; padding: 0 23px; }
+      .layout { grid-template-columns: minmax(0, 1fr) 270px; gap: 22px; padding: 27px 23px 38px; }
+    }
+    @media (max-width: 640px) {
+      .sidebar { height: 56px; padding: 0 14px; }
+      .nav button { width: 36px; height: 36px; justify-content: center; padding: 0; font-size: 0; }
+      .nav svg { width: 18px; height: 18px; }
+      .topbar { min-height: 47px; padding: 0 17px; }
+      .breadcrumb { font-size: 11px; }
+      .today-label { display: none; }
+      .top-actions { gap: 0; }
+      .layout { display: flex; flex-direction: column; gap: 28px; padding: 24px 17px 34px; }
+      h1 { font-size: 31px; }
+      .intro { margin-bottom: 21px; }
+      .stat { padding: 13px 10px; }
+      .stat-label { gap: 5px; font-size: 9px; }
+      .stat-value { font-size: 22px; }
+      .stat-note { font-size: 9px; }
+      .section-heading h2 { font-size: 20px; }
+      .task-row { grid-template-columns: 20px minmax(0, 1fr) auto; gap: 9px; padding-right: 11px; padding-left: 11px; }
+      .task-title { font-size: 12px; }
+      .task-time { font-size: 10px; }
+      .week-chart { gap: 9px; }
+      .right-column { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 0; }
+      .focus-photo { height: 145px; }
+      .right-section { margin-top: 21px; }
+      .quote { margin-top: 20px; }
+      .subject-row { grid-template-columns: 38px minmax(0, 1fr) 68px; gap: 9px; padding-right: 10px; padding-left: 10px; }
+      .subject-progress { width: 68px; }
+      .agenda-day { grid-template-columns: 60px minmax(0, 1fr); }
+      .exam-strip { grid-template-columns: 1fr; gap: 8px; }
+      .plan-week { grid-template-columns: 70px minmax(0, 1fr); gap: 10px; }
+      .plan-week:has([data-week-index]) { grid-template-columns: 70px minmax(0, 1fr) 29px; }
+      .plan-track { grid-template-columns: 61px minmax(0, 1fr); font-size: 10px; }
+    }
+    body { background-color: var(--paper); background-image: linear-gradient(#a7b2910b 1px, transparent 1px), linear-gradient(90deg, #a7b2910b 1px, transparent 1px); background-size: 32px 32px; }
+    .topbar { border-color: var(--line); background: #0d110fed; }
+    .breadcrumb, .today-label, .intro, .view-intro, .eyebrow, .section-heading .week-total, .goal-line, .goal-foot, .task-time, .task-subject, .task-title, .stat-label, .stat-note, .week-total, .agenda-date, .agenda-item span, .plan-week-date, .plan-track, .subject-row small, .save-status { color: #aab2a7; }
+    .stats, .task-list, .subject-list, .exam-date, .notes-area, .quote { border-color: var(--line); background: #131815; color: var(--ink); }
+    .stat + .stat, .task-row + .task-row, .subject-row + .subject-row { border-color: #29312b; }
+    .section-heading h2, .subject-group h2, .plan-week-date strong, .agenda-date strong, .subject-row strong, .task-title { color: var(--ink); }
+    .task-row.done .task-title { color: #899286; }
+    .task-form { border-color: var(--line); background: #171d19; }
+    .task-form input, .task-form select, .form-field input, .form-field select { border-color: #374139; background: #0e1310; color: var(--ink); }
+    .agenda-list, .plan-list, .routine-list { border-color: var(--line); }
+    .agenda-day, .plan-week, .routine-row, .goal-row { border-color: #29312b; }
+    .plan-week.week-done { background: #182018; }
+    .exam-date strong, .plan-week-focus span, .agenda-item, .subject-row { color: #e4e9df; }
+    .quote { border-left-color: var(--orange); }
+    .progress-track, .bar-track { background: #29312b; }
+    .week-chart { border-color: var(--line); }
+    dialog { border-color: #384139; background: #151a17; color: var(--ink); }
+    .close-dialog { background: #242b25; color: var(--ink); }
+    .plan-week:has([data-week-index]) { grid-template-columns: 100px minmax(0, 1fr) 32px; }
+    .plan-week [data-week-index] svg { display: block; }
+    .plan-week.week-done [data-week-index] { border-color: var(--forest); background: var(--forest); color: #fff; }
+    .bar-fill[style*="height:0%"] { min-height: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">AE</span><span>Acompanhamento<small>DE ESTUDOS</small></span></div>
+      <p class="nav-label">Seu espaço</p>
+      <nav class="nav" aria-label="Seções">
+        <button class="active" type="button" data-view="dashboard" aria-current="page" title="Visão geral">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg><span>Visão geral</span>
+        </button>
+        <button type="button" data-view="subjects" title="Matérias">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v14A2.5 2.5 0 0 1 6.5 17H20M8 7h8M8 10h6"/></svg><span>Matérias</span>
+        </button>
+        <button type="button" data-view="agenda" title="Agenda">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 10h17M8 14h3M8 17h6"/></svg><span>Agenda</span>
+        </button>
+        <button type="button" data-view="notes" title="Anotações">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg><span>Anotações</span>
+        </button>
+      </nav>
+      <div class="side-bottom">
+        <div class="side-tip"><span>UM LEMBRETE</span><p>Um pouco todos os dias também é progresso.</p></div>
+        <div class="profile"><span class="avatar" aria-hidden="true">AE</span><span><strong>Plano integrado</strong><small>PMPE Soldado + PCPE Agente</small></span></div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumb">Acompanhamento de estudos <span aria-hidden="true">/</span> <strong id="breadcrumb-current">Visão geral</strong></div>
+        <div class="top-actions"><span class="today-label" id="today-label"></span><button class="icon-button" type="button" aria-label="Notificações" title="Tudo em dia"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button></div>
+      </header>
+
+      <div class="layout">
+        <main class="main-column" id="main-content" tabindex="-1"></main>
+        <aside class="right-column" aria-label="Ferramentas de estudo">
+          <section class="focus-card" aria-labelledby="focus-heading">
+            <div class="focus-photo"><img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=900&q=80" alt="Caderno aberto durante uma sessão de estudos" onerror="this.style.display='none'"><div class="focus-photo-label"><span>ESPAÇO DE CONCENTRAÇÃO</span><span class="live-dot">Pronto para começar</span></div></div>
+            <div class="focus-body">
+              <div class="focus-overline">Técnica Pomodoro</div>
+              <h2 class="focus-title" id="focus-heading">Um passo de cada vez.</h2>
+              <div class="timer" id="timer" role="timer" aria-live="off">25:00</div>
+              <div class="timer-mode" role="group" aria-label="Duração da sessão">
+                <button class="mode-button active" type="button" data-minutes="25">Foco 25</button><button class="mode-button" type="button" data-minutes="5">Pausa 5</button><button class="mode-button" type="button" data-minutes="15">Pausa 15</button>
+              </div>
+              <div class="timer-actions"><button class="start-button" id="timer-toggle" type="button">Iniciar sessão</button><button class="reset-button" id="timer-reset" type="button" aria-label="Reiniciar timer" title="Reiniciar"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/></svg></button></div>
+              <p class="focus-count" id="focus-count">0 sessões de foco concluídas hoje</p>
+            </div>
+          </section>
+          <section class="right-section" aria-labelledby="goal-title"><h3 id="goal-title">Provas previstas</h3><div class="goal-line"><span>PMPE · Soldado</span><strong>21 fev 2027</strong></div><div class="goal-line"><span>PCPE · Agente</span><strong>07 mar 2027</strong></div><p class="goal-foot">Datas conforme os cronogramas dos editais.</p></section>
+          <blockquote class="quote">“A jornada de mil quilômetros começa com um único passo.”<small>Um lembrete para hoje</small></blockquote>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="task-dialog" aria-labelledby="dialog-title">
+    <form class="dialog-content" id="task-form">
+      <div class="dialog-top"><h2 id="dialog-title">Nova tarefa</h2><button class="close-dialog" type="button" aria-label="Fechar" id="dialog-close">×</button></div>
+      <div class="form-field"><label for="task-name">O que você vai estudar?</label><input id="task-name" name="title" maxlength="90" required placeholder="Ex.: Revisar capítulo 3"></div>
+      <div class="form-field"><label for="task-subject-input">Matéria</label><select id="task-subject-input" name="subject"><option value="" selected>Selecione uma matéria</option><option>Base comum</option><option>PMPE · Soldado</option><option>PCPE · Agente</option></select></div>
+      <div class="form-field"><label for="task-time-input">Horário</label><input id="task-time-input" name="time" type="time" value=""></div>
+      <button class="submit-task" type="submit">Adicionar ao meu plano</button>
+    </form>
+  </dialog>
+
+  <script>
+    const iconCheck = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+    const defaultTasks = [];
+    const storedTasks = localStorage.getItem('study-plan-v3-tasks');
+    let tasks = storedTasks ? JSON.parse(storedTasks) : defaultTasks;
+    const mainContent = document.querySelector('#main-content');
+    const navButtons = [...document.querySelectorAll('.nav button')];
+    const today = new Date();
+    const dateFormatter = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.querySelector('#today-label').textContent = dateFormatter.format(today);
+    const titleCase = value => value.charAt(0).toUpperCase() + value.slice(1);
+    const currentDate = titleCase(dateFormatter.format(today));
+
+    function saveTasks() { localStorage.setItem('study-plan-v3-tasks', JSON.stringify(tasks)); }
+
+    function renderDashboard() {
+      const completed = tasks.filter(task => task.done).length;
+      const completedStudyWeeks = JSON.parse(localStorage.getItem('study-plan-v2-weeks') || '[]').length;
+      mainContent.innerHTML = `
+        <section class="view-panel" aria-labelledby="page-title">
+          <p class="eyebrow">${currentDate} · Seu espaço de estudos</p>
+          <h1 id="page-title">Seu próximo passo começa agora.</h1>
+          <p class="intro">Cada sessão conta. Veja o que está no seu plano para hoje.</p>
+          <div class="stats" aria-label="Resumo do dia">
+            <div class="stat"><div class="stat-label"><span class="stat-dot"></span>Tarefas de hoje</div><div class="stat-value">${tasks.length}</div><div class="stat-note">no seu plano</div></div>
+            <div class="stat"><div class="stat-label"><span class="stat-dot"></span>Concluídas</div><div class="stat-value">${completed}</div><div class="stat-note">${tasks.length - completed} para terminar</div></div>
+            <div class="stat"><div class="stat-label"><span class="stat-dot"></span>Semanas concluídas</div><div class="stat-value">${completedStudyWeeks}</div><div class="stat-note">marque seu avanço</div></div>
+          </div>
+          <section aria-labelledby="tasks-heading">
+            <div class="section-heading"><h2 id="tasks-heading">Plano de hoje</h2><button class="text-button" type="button" id="add-task"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>Nova tarefa</button></div>
+            <div class="task-list" id="task-list" aria-live="polite">${tasks.length ? tasks.map(task => `<div class="task-row ${task.done ? 'done' : ''}" data-task-id="${task.id}"><button class="task-check" type="button" aria-label="${task.done ? 'Marcar como pendente' : 'Marcar como concluída'}: ${escapeHtml(task.title)}" aria-pressed="${task.done}">${iconCheck}</button><div><div class="task-title">${escapeHtml(task.title)}</div><div class="task-subject">${escapeHtml(task.subject)}</div></div><time class="task-time">${escapeHtml(task.time)}</time></div>`).join('') : '<div class="empty-state">Seu plano está livre. Adicione uma tarefa para começar.</div>'}</div>
+          </section>
+          <section class="week-section" aria-labelledby="week-heading">
+            <div class="section-heading"><h2 id="week-heading">Seu ritmo esta semana</h2><span class="week-total">0 horas registradas</span></div>
+            <div class="week-chart" role="img" aria-label="Ainda não há horas de estudo registradas nesta semana">
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">seg</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">ter</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">qua</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">qui</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">sex</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">sáb</span></div>
+              <div class="day-column"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><span class="day-label">dom</span></div>
+            </div>
+          </section>
+        </section>`;
+      document.querySelector('#add-task').addEventListener('click', () => document.querySelector('#task-dialog').showModal());
+      document.querySelector('#task-list').addEventListener('click', event => {
+        const button = event.target.closest('.task-check');
+        if (!button) return;
+        const row = button.closest('[data-task-id]');
+        const task = tasks.find(item => item.id === Number(row.dataset.taskId));
+        task.done = !task.done;
+        saveTasks();
+        renderDashboard();
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+
+    const studyWeeks = [
+      { period: '19–25 out', common: 'Português: interpretação e gêneros. Raciocínio: proposições, conectivos, quantificadores e falácias. Informática: internet, intranet, navegadores e nuvem. Constitucional: princípios fundamentais.', pmpe: 'História: ocupação, colonização, povos nativos, Capitanias e Duarte Coelho. Direitos Humanos: conceitos, fundamentos e classificação. Legislação: ECA, direitos e garantias.', pcpe: 'Legislação estadual: Constituição de Pernambuco e estatutos do cargo de Agente.' },
+      { period: '26 out–1 nov', common: 'Português: figuras de linguagem e relações semânticas. Raciocínio: analogias, inferências, equivalência e argumentos. Informática: ameaças, malware, phishing, criptografia e autenticação. Constitucional: direitos individuais e coletivos.', pmpe: 'História: açúcar, Olinda e Recife. Direitos Humanos: evolução e gerações. Legislação: ECA, ato infracional, apreensão e Conselho Tutelar.', pcpe: 'Constitucional: princípios, direitos e organização do Estado.' },
+      { period: '2–8 nov', common: 'Português: ortografia e acentuação. Raciocínio: diagramas lógicos. Informática: armazenamento, backup e restauração. Constitucional: direitos sociais, nacionalidade, direitos políticos e remédios.', pmpe: 'História: presença holandesa e Maurício de Nassau. Direitos Humanos: tratados no ordenamento brasileiro, CF art. 5º, §§ 2º e 3º. Legislação: Abuso de Autoridade e Tortura.', pcpe: 'Administrativo: princípios, atos e poderes.' },
+      { period: '9–15 nov', common: 'Português: classes de palavras. Raciocínio: princípio multiplicativo e contagem. Informática: arquivos, pastas, componentes, memória e periféricos. Constitucional: organização do Estado e competências.', pmpe: 'História: quilombos e Insurreição Pernambucana. Direitos Humanos: Declaração Universal. Legislação: Lei Maria da Penha.', pcpe: 'Penal: lei penal, aplicação e teoria do crime.' },
+      { period: '16–22 nov', common: 'Português: crase. Raciocínio: permutações, arranjos e combinações. Informática: Windows 11, configurações e Prompt de Comando. Constitucional: União, Estados, Municípios e Administração Pública.', pmpe: 'História: Guerra dos Mascates, Revolução de 1817 e Confederação do Equador. Direitos Humanos: Pacto de San José. Legislação: crimes de preconceito racial.', pcpe: 'Processual Penal: investigação, inquérito e ação penal.' },
+      { period: '23–29 nov', common: 'Português: sintaxe, termos da oração e coordenação/subordinação. Raciocínio: probabilidade. Informática: Office 2019 e LibreOffice 7. Constitucional: servidores públicos e militares.', pmpe: 'História: Guerra dos Cabanos e Revolução Praieira. Direitos Humanos: revisão de teoria, gerações e tratados. Legislação: Crimes Ambientais.', pcpe: 'Penal e Processo Penal: lei penal, procedimentos e investigação.' },
+      { period: '30 nov–6 dez', common: 'Português: funções de “que” e “se”, coesão e questões acumuladas. Informática: Excel, Calc, PowerPoint, Impress, fórmulas, gráficos e exportação. Constitucional: Poderes e Funções Essenciais à Justiça.', pmpe: 'História: período republicano. Direitos Humanos: questões da DUDH e do Pacto de San José. Legislação: Crimes Hediondos e Lei de Drogas.', pcpe: 'Contabilidade: patrimônio, contas, lançamentos e escrituração.' },
+      { period: '7–13 dez', common: 'Português: pontuação e concordância. Informática: revisão de internet, segurança, backup, Windows, Office e LibreOffice. Constitucional: defesa do Estado, instituições democráticas e jurisprudência.', pmpe: 'História: frevo, maracatu, culinária, festas e cultura afro-brasileira. Direitos Humanos: revisão do edital. Legislação: Estatuto dos Policiais Militares de Pernambuco.', pcpe: 'Estatística: tabelas, gráficos, medidas e análise exploratória.' },
+      { period: '14–20 dez', common: 'Português: regência e colocação pronominal. Raciocínio: estruturas, argumentação, diagramas e contagem. Informática: questões dos pontos fracos. Constitucional: direitos fundamentais, Estado e Poderes.', pmpe: 'História: revisão da cronologia. Direitos Humanos: revisão de leis e tratados. Legislação: Estatuto da Pessoa Idosa e Estatuto da Juventude.', pcpe: 'Informática: Windows, Microsoft 365, internet e segurança.' },
+      { period: '21–27 dez', common: 'Português: formação de palavras, significação e variação linguística. Raciocínio: bateria geral. Informática: simulado. Constitucional: questões e jurisprudência.', pmpe: 'História: questões de todo o conteúdo. Direitos Humanos e Legislação: súmulas, jurisprudência e leis do edital.', pcpe: 'Discursiva: treino sobre tema atual de segurança pública.' },
+      { period: '28 dez–3 jan', common: 'Português e História: revisão integral. Raciocínio e Informática: revisão e bateria. Constitucional: revisão pelos pontos fracos.', pmpe: 'Direitos Humanos e Legislação: revisão integral. Questões mistas cronometradas; classificar erros. Produzir uma redação completa.', pcpe: 'Simulado das matérias específicas e treino discursivo.' },
+      { period: '4–10 jan', common: 'Segunda a sábado: revisão direcionada, pontos de lei esquecidos e questões dos assuntos com menor acerto. Revisão D+1, D+7 e D+30.', pmpe: 'Domingo: simulado completo com 60 questões, tempo controlado e redação; classificar erros e definir revisão final.', pcpe: 'Revisar legislação estadual, Administrativo, Penal, Processo Penal, Contabilidade e Estatística.' },
+      { period: '11–17 jan', common: 'Revisão dirigida pelos erros dos simulados.', pmpe: 'Redação completa e simulado objetivo PMPE.', pcpe: 'Contabilidade e Estatística: exercícios e prova discursiva.' },
+      { period: '18–24 jan', common: 'Simulado cronometrado das disciplinas comuns e correção detalhada.', pmpe: 'Simulado completo PMPE: 60 questões e redação.', pcpe: 'Simulado PCPE Agente e treino discursivo sobre segurança pública.' },
+      { period: '25–31 jan', common: 'Revisar lacunas e erros recorrentes; manter questões diárias.', pmpe: 'Legislação, História e redação: revisão final por mapas e questões.', pcpe: 'Direito, Contabilidade e Estatística: manutenção de conteúdo.' },
+      { period: '1–7 fev', common: 'Revisão final de Português, Raciocínio, Informática e Constitucional.', pmpe: 'Dois simulados parciais, redação cronometrada e preparação física específica.', pcpe: 'Um simulado curto e revisão das leis estaduais do cargo de Agente.' },
+      { period: '8–14 fev', common: 'Revisão de alto rendimento: caderno de erros e tópicos mais cobrados.', pmpe: 'Último simulado completo até 14/02; reduzir volume e preservar descanso.', pcpe: 'Manutenção leve das matérias específicas, sem retirar foco da PMPE.' },
+      { period: '15–21 fev', common: 'Revisões curtas, sono regular e pausa na véspera.', pmpe: 'Revisão final e prova de Soldado em 21/02/2027.', pcpe: 'Manutenção leve; retomar o foco após a prova da PMPE.' },
+      { period: '22–28 fev', common: 'Português, Raciocínio, Informática e Constitucional em questões Cebraspe.', pmpe: 'Prova realizada; registrar pontos para etapas seguintes, se aplicável.', pcpe: 'Foco total em legislação, Penal, Processo Penal e específicos de Agente.' },
+      { period: '1–7 mar', common: 'Revisão objetiva dos tópicos comuns e caderno de erros.', pmpe: '—', pcpe: 'Simulado final, revisão leve e prova de Agente em 07/03/2027 à tarde.' }
+    ];
+
+    const weeklyRoutine = [
+      ['Segunda', 'Língua Portuguesa', 'Teoria, interpretação e gramática.', 'COMUM'],
+      ['Terça', 'História de Pernambuco', 'Conteúdo histórico e cronologia.', 'PMPE'],
+      ['Quarta', 'Raciocínio Lógico', 'Conceitos, técnicas e exercícios.', 'COMUM'],
+      ['Quinta', 'Informática', 'Conceitos, sistemas e questões práticas.', 'COMUM'],
+      ['Sexta', 'Direito Constitucional', 'Constituição e legislação relacionada.', 'COMUM'],
+      ['Sábado', 'Direitos Humanos + Legislação', 'Dividir as 3h entre as duas áreas e incluir a legislação específica PCPE.', 'PMPE + PCPE'],
+      ['Domingo', 'Revisão + simulado + redação', 'Priorizar pontos fracos, questões mistas e treino discursivo.', 'ALTERNAR']
+    ];
+    const dailyBlocks = [
+      ['1h15', 'Teoria e legislação', 'Estudar conteúdo novo; em Direito, ler os dispositivos legais pertinentes.'],
+      ['1h', 'Questões', 'Resolver questões do assunto e corrigir cada resposta.'],
+      ['45 min', 'Revisão', 'Recordar sem consulta, revisar temas anteriores e analisar erros.']
+    ];
+    const revisionIntervals = [
+      ['D+1 · dia seguinte', '10 min', 'Recordar conceitos sem consulta e conferir os erros.'],
+      ['D+7 · uma semana', '15 min', 'Resolver questões do assunto e revisar o que errou.'],
+      ['D+30 · um mês', '20 min', 'Fazer teste sem consulta e avaliar a retenção.']
+    ];
+    const questionGoals = [
+      ['Português', '15–20'], ['História de Pernambuco', '15–20'], ['Raciocínio Lógico', '10–15'],
+      ['Informática', '15–20'], ['Direito Constitucional', '15–20'], ['Direitos Humanos + Legislação', '15–20']
+    ];
+
+    function renderStudyPlan() {
+      let completedWeeks = [];
+      try { completedWeeks = JSON.parse(localStorage.getItem('study-plan-v3-weeks') || '[]'); } catch { completedWeeks = []; }
+      mainContent.innerHTML = `<section class="view-panel" aria-labelledby="page-title">
+        <p class="eyebrow">PLANO PMPE · 12 SEMANAS + EXTENSÃO</p><h1 id="page-title">Cronograma de estudos</h1>
+        <p class="view-intro">Plano-base de Soldado PMPE integrado à preparação para PCPE Agente. As 12 semanas são uma proposta de organização, não uma previsão oficial da data da prova.</p>
+        <div class="exam-strip"><article class="exam-date"><span>PMPE · SOLDADO</span><strong>21 de fevereiro de 2027</strong><small>60 questões objetivas + redação</small></article><article class="exam-date pcpe"><span>PCPE · AGENTE</span><strong>7 de março de 2027</strong><small>Prova objetiva + discursiva · tarde</small></article></div>
+        <section class="plan-section"><div class="section-heading"><h2>Rotina diária · 3 horas</h2><span class="week-total">21 horas / semana</span></div><div class="subject-list">${dailyBlocks.map(([time, label, detail]) => `<div class="subject-row"><span class="subject-icon">${time}</span><span><strong>${label}</strong><small>${detail}</small></span></div>`).join('')}</div></section>
+        <section class="plan-section"><div class="section-heading"><h2>Grade semanal fixa</h2></div><div class="plan-list">${weeklyRoutine.map(([day, subject, focus, tag]) => `<div class="plan-week"><div class="plan-week-date"><strong>${day}</strong></div><div class="plan-week-focus"><div class="plan-track"><strong>${tag}</strong><span><b>${subject}:</b> ${focus}</span></div></div></div>`).join('')}</div></section>
+        <section class="plan-section"><div class="section-heading"><h2>Conteúdo e metas · semana a semana</h2><span class="week-total">${completedWeeks.length}/${studyWeeks.length} do ciclo-base</span></div><p class="week-total">Marque a semana somente depois de estudar os tópicos, resolver questões e revisar os erros.</p><div class="plan-list">${studyWeeks.map((week, index) => `<article class="plan-week ${completedWeeks.includes(index) ? 'week-done' : ''}"><div class="plan-week-date"><strong>Semana ${index + 1}</strong>${week.period}<small>${index < 12 ? 'CICLO 12 SEMANAS' : 'EXTENSÃO ATÉ A PROVA'}</small></div><div class="plan-week-focus"><div class="plan-track"><strong>COMUM</strong><span>${week.common}</span></div><div class="plan-track pmpe"><strong>PMPE</strong><span>${week.pmpe}</span></div><div class="plan-track pcpe"><strong>PCPE AGENTE</strong><span>${week.pcpe}</span></div></div><button class="task-check ${completedWeeks.includes(index) ? 'done' : ''}" type="button" data-week-index="${index}" aria-label="Marcar semana ${index + 1} como concluída" aria-pressed="${completedWeeks.includes(index)}">${iconCheck}</button></article>`).join('')}</div></section>
+        <section class="plan-section"><div class="section-heading"><h2>Sistema de revisão</h2></div><div class="subject-list">${revisionIntervals.map(([interval, duration, activity]) => `<div class="subject-row"><span class="subject-icon">${duration}</span><span><strong>${interval}</strong><small>${activity}</small></span></div>`).join('')}</div><p class="week-total">Use os 45 minutos diários de revisão para estes retornos e para corrigir erros antigos. Se houver acúmulo, priorize os assuntos em que mais erra.</p></section>
+        <section class="plan-section"><div class="section-heading"><h2>Meta inicial de questões</h2></div><div class="subject-list">${questionGoals.map(([subject, count]) => `<div class="subject-row"><span><strong>${subject}</strong></span><span class="week-total">${count} por sessão</span></div>`).join('')}</div><p class="week-total">Metas são referências: em questões complexas, priorize correção e entendimento, não volume.</p></section>
+        <section class="plan-section"><div class="section-heading"><h2>Caderno de erros</h2></div><div class="subject-list"><div class="subject-row"><span><strong>Assunto</strong><small>Registre o tópico exato da questão.</small></span></div><div class="subject-row"><span><strong>Motivo</strong><small>Identifique desconhecimento, confusão conceitual ou falta de atenção.</small></span></div><div class="subject-row"><span><strong>Correção</strong><small>Anote a regra, conceito ou dispositivo legal a rever.</small></span></div><div class="subject-row"><span><strong>Todo domingo</strong><small>Escolha os três assuntos com pior desempenho para priorizar na semana seguinte.</small></span></div></div></section>
+        <p class="save-status">A prova PMPE prevê 60 questões objetivas (60 pontos) e redação (40 pontos). O prazo de 12 semanas depende do ritmo individual; conclua pendências antes de repetir conteúdo dominado.</p>
+      </section>`;
+      mainContent.querySelectorAll('[data-week-index]').forEach(button => button.addEventListener('click', () => {
+        const index = Number(button.dataset.weekIndex);
+        completedWeeks = completedWeeks.includes(index) ? completedWeeks.filter(item => item !== index) : [...completedWeeks, index];
+        localStorage.setItem('study-plan-v3-weeks', JSON.stringify(completedWeeks));
+        renderStudyPlan();
+      }));
+    }
+
+    const views = {
+      dashboard: { title: 'Visão geral', render: renderDashboard },
+      subjects: { title: 'Matérias', render: () => {
+        mainContent.innerHTML = `<section class="view-panel" aria-labelledby="page-title"><p class="eyebrow">PMPE Soldado + PCPE Agente</p><h1 id="page-title">Matérias do edital</h1><p class="view-intro">A base comum aparece uma vez. Os tópicos com diferenças de profundidade e as disciplinas exclusivas ficam separados por concurso.</p><section class="subject-group"><h2>Base compartilhada</h2><p>Estude esta base para as duas provas e confira no edital o recorte específico de cada banca.</p><div class="subject-list"><div class="subject-row"><span class="subject-icon">P</span><span><strong>Língua Portuguesa</strong><small>Interpretação, coesão, gramática e ortografia.</small></span></div><div class="subject-row"><span class="subject-icon">∑</span><span><strong>Raciocínio Lógico</strong><small>Conjuntos, proporções, lógica e resolução de problemas.</small></span></div><div class="subject-row"><span class="subject-icon">I</span><span><strong>Informática</strong><small>Sistemas, ferramentas de escritório, internet e segurança.</small></span></div><div class="subject-row"><span class="subject-icon">C</span><span><strong>Direito Constitucional</strong><small>Base comum; revise separadamente os tópicos específicos de cada edital.</small></span></div><div class="subject-row"><span class="subject-icon">H</span><span><strong>Direitos Humanos</strong><small>Há tópicos relacionados nos dois editais; legislação e extensão variam.</small></span></div></div></section><section class="subject-group"><h2>Específicas · PMPE Soldado</h2><div class="subject-list"><div class="subject-row"><span class="subject-icon">PE</span><span><strong>História de Pernambuco</strong><small>Colonização, movimentos históricos, período republicano e cultura.</small></span></div><div class="subject-row"><span class="subject-icon">L</span><span><strong>Legislação Extravagante</strong><small>Leis do bloco de Direitos Humanos e Legislação do edital PMPE.</small></span></div><div class="subject-row"><span class="subject-icon">R</span><span><strong>Redação e TAF</strong><small>Treino de redação e preparação física conforme os índices PMPE.</small></span></div></div></section><section class="subject-group"><h2>Específicas · PCPE Agente</h2><div class="subject-list"><div class="subject-row"><span class="subject-icon">E</span><span><strong>Legislação Estadual</strong><small>Constituição de Pernambuco, estatutos e leis estaduais indicadas.</small></span></div><div class="subject-row"><span class="subject-icon">D</span><span><strong>Direito Administrativo</strong><small>Princípios, atos, poderes, organização e controle da Administração.</small></span></div><div class="subject-row"><span class="subject-icon">P</span><span><strong>Direito Penal e Processual Penal</strong><small>Teoria do crime, legislação penal, inquérito, provas e procedimentos.</small></span></div><div class="subject-row"><span class="subject-icon">C</span><span><strong>Contabilidade Geral e Estatística</strong><small>Disciplinas específicas do cargo de Agente no edital PCPE.</small></span></div><div class="subject-row"><span class="subject-icon">A</span><span><strong>Atualidades e prova discursiva</strong><small>Atualidades de segurança pública para a discursiva PCPE.</small></span></div></div></section></section>`;
+      } },
+      agenda: { title: 'Cronograma', render: () => {
+        const routine = [
+          ['Segunda', [['Português', 'COMUM'], ['Raciocínio Lógico', 'COMUM'], ['Legislação Estadual', 'PCPE AGENTE']]],
+          ['Terça', [['Direito Constitucional', 'COMUM'], ['História de Pernambuco', 'PMPE'], ['Direito Administrativo', 'PCPE AGENTE']]],
+          ['Quarta', [['Informática', 'COMUM'], ['Direitos Humanos', 'PMPE + PCPE'], ['Direito Penal', 'PCPE AGENTE']]],
+          ['Quinta', [['Português: questões e redação', 'COMUM + PMPE'], ['Processual Penal', 'PCPE AGENTE'], ['História de Pernambuco', 'PMPE']]],
+          ['Sexta', [['Contabilidade Geral', 'PCPE AGENTE'], ['Estatística', 'PCPE AGENTE'], ['Discursiva / redação', 'ALTERNAR']]],
+          ['Sábado', [['Simulado e correção', 'ALTERNAR PMPE / PCPE'], ['Caderno de erros', 'COMUM + ESPECÍFICAS'], ['Treino físico', 'TAF PMPE / PCPE']]]
+        ];
+        mainContent.innerHTML = `<section class="view-panel" aria-labelledby="page-title"><p class="eyebrow">Editais 2026 · ciclo até março de 2027</p><h1 id="page-title">Cronograma integrado</h1><p class="view-intro">A base comum é estudada em conjunto. A PMPE recebe prioridade até 21 de fevereiro; depois, o foco passa para PCPE Agente.</p><div class="exam-strip"><article class="exam-date"><span>PMPE · Soldado</span><strong>21 de fevereiro de 2027</strong><small>Prova objetiva e redação</small></article><article class="exam-date pcpe"><span>PCPE · Agente</span><strong>7 de março de 2027</strong><small>Provas objetiva e discursiva · tarde</small></article></div><section class="plan-section"><div class="section-heading"><h2>Rotina semanal-base</h2><span class="week-total">15 horas / semana</span></div><p>Proposta provisória: 3 blocos de 50 minutos por dia, de segunda a sábado; domingo para descanso. Ajustarei a carga quando você enviar seu cronograma atual.</p><div class="agenda-list">${routine.map(([day, items]) => `<div class="agenda-day"><div class="agenda-date"><strong>${day.slice(0, 3)}</strong>${day}</div><div class="agenda-items">${items.map(([subject, tag]) => `<div class="agenda-item">${subject}<span>${tag}</span></div>`).join('')}</div></div>`).join('')}</div></section><section class="plan-section"><div class="section-heading"><h2>Metas por semana</h2><span class="week-total">18 semanas PMPE + 2 PCPE</span></div><p>Faça questões ao final de cada bloco e registre erros. Simulados e redações aumentam nas semanas finais.</p><div class="plan-list">${studyWeeks.map((week, index) => `<article class="plan-week"><div class="plan-week-date"><strong>Semana ${index + 1}</strong>${week.period}<small>${index < 18 ? 'PMPE + PCPE' : 'Foco PCPE'}</small></div><div class="plan-week-focus"><div class="plan-track"><strong>COMUM</strong><span>${week.common}</span></div><div class="plan-track pmpe"><strong>PMPE</strong><span>${week.pmpe}</span></div><div class="plan-track pcpe"><strong>PCPE AGENTE</strong><span>${week.pcpe}</span></div></div></article>`).join('')}</div></section><p class="save-status">Plano montado a partir dos editais enviados. O cronograma pessoal de 12 semanas ainda não foi anexado; por isso, esta carga e a distribuição diária são uma base ajustável.</p></section>`;
+      } },
+      notes: { title: 'Anotações', render: () => {
+        const savedNote = localStorage.getItem('study-plan-v3-note') || '';
+        mainContent.innerHTML = `<section class="view-panel" aria-labelledby="page-title"><p class="eyebrow">Suas ideias, no seu tempo</p><h1 id="page-title">Anotações</h1><p class="view-intro">Guarde aqui os principais aprendizados, dúvidas e ideias para retomar depois.</p><label class="notes-label" for="notes-area">Caderno de estudos</label><textarea class="notes-area" id="notes-area" placeholder="Uma ideia importante de hoje..."></textarea><div class="save-status" id="save-status" aria-live="polite">Suas anotações ficam salvas neste dispositivo.</div></section>`;
+        const area = document.querySelector('#notes-area');
+        area.value = savedNote;
+        area.addEventListener('input', () => {
+          localStorage.setItem('study-plan-v3-note', area.value);
+          document.querySelector('#save-status').textContent = 'Salvo automaticamente.';
+        });
+      } }
+    };
+
+    views.agenda.render = renderStudyPlan;
+
+    function setView(name) {
+      const view = views[name] || views.dashboard;
+      navButtons.forEach(button => {
+        const active = button.dataset.view === name;
+        button.classList.toggle('active', active);
+        if (active) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      });
+      document.querySelector('#breadcrumb-current').textContent = view.title;
+      view.render();
+    }
+    navButtons.forEach(button => button.addEventListener('click', () => setView(button.dataset.view)));
+    renderDashboard();
+
+    const timerDisplay = document.querySelector('#timer');
+    const toggleButton = document.querySelector('#timer-toggle');
+    const focusCount = document.querySelector('#focus-count');
+    let selectedMinutes = 25;
+    let secondsLeft = selectedMinutes * 60;
+    let timerInterval = null;
+    let completedFocusSessions = 0;
+    function updateTimer() {
+      const minutes = Math.floor(secondsLeft / 60);
+      const seconds = secondsLeft % 60;
+      timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      document.title = timerInterval ? `${timerDisplay.textContent} · Acompanhamento de estudos` : 'Acompanhamento de estudos';
+    }
+    function stopTimer() { clearInterval(timerInterval); timerInterval = null; toggleButton.textContent = 'Continuar sessão'; updateTimer(); }
+    toggleButton.addEventListener('click', () => {
+      if (timerInterval) { stopTimer(); return; }
+      if (secondsLeft === 0) secondsLeft = selectedMinutes * 60;
+      toggleButton.textContent = 'Pausar sessão';
+      timerInterval = setInterval(() => {
+        secondsLeft -= 1;
+        if (secondsLeft <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          secondsLeft = 0;
+          toggleButton.textContent = 'Iniciar sessão';
+          if (selectedMinutes === 25) {
+            completedFocusSessions += 1;
+            focusCount.textContent = `${completedFocusSessions} ${completedFocusSessions === 1 ? 'sessão de foco concluída' : 'sessões de foco concluídas'} hoje`;
+          }
+        }
+        updateTimer();
+      }, 1000);
+    });
+    document.querySelector('#timer-reset').addEventListener('click', () => {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      secondsLeft = selectedMinutes * 60;
+      toggleButton.textContent = 'Iniciar sessão';
+      updateTimer();
+    });
+    document.querySelectorAll('.mode-button').forEach(button => button.addEventListener('click', () => {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      selectedMinutes = Number(button.dataset.minutes);
+      secondsLeft = selectedMinutes * 60;
+      document.querySelectorAll('.mode-button').forEach(mode => mode.classList.toggle('active', mode === button));
+      toggleButton.textContent = 'Iniciar sessão';
+      updateTimer();
+    }));
+
+    const taskDialog = document.querySelector('#task-dialog');
+    document.querySelector('#dialog-close').addEventListener('click', () => taskDialog.close());
+    taskDialog.addEventListener('click', event => { if (event.target === taskDialog) taskDialog.close(); });
+    document.querySelector('#task-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      tasks.push({ id: Date.now(), title: data.get('title').trim(), subject: data.get('subject'), time: data.get('time'), done: false });
+      saveTasks();
+      taskDialog.close();
+      event.currentTarget.reset();
+      document.querySelector('#task-time-input').value = '';
+      setView('dashboard');
+    });
+  </script>
+</body>
+</html>
